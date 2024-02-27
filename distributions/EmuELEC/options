@@ -241,7 +241,7 @@
 # start SX05RE added options
   
 LAKKA_MIRROR="http://sources.lakka.tv"
-#REMOVIDOS
+#REMOVIDOS ppsspp \
 LIBRETRO_CORES="2048 \
 81 \
 atari800 \
@@ -291,7 +291,6 @@ pcsx_rearmed \
 picodrive \
 pocketcdg \
 pokemini \
-ppsspp \
 prboom \
 prosystem \
 puae \
