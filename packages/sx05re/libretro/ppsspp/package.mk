@@ -19,21 +19,23 @@
 ################################################################################
 
 PKG_NAME="ppsspp"
-PKG_VERSION="9de9420878df6805a1db40ede7bd264499cb1425"
+PKG_VERSION="$(get_pkg_version PPSSPPSDL)"
+PKG_NEED_UNPACK="$(get_pkg_directory PPSSPPSDL)"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/hrydgard/ppsspp"
 PKG_URL="https://github.com/hrydgard/ppsspp.git"
-PKG_DEPENDS_TARGET="toolchain SDL2-git ffmpeg"
+PKG_DEPENDS_TARGET="toolchain SDL2 ffmpeg"
 PKG_LONGDESC="A PSP emulator for Android, Windows, Mac, Linux and Blackberry 10, written in C++."
 GET_HANDLER_SUPPORT="git"
+PKG_PATCH_DIRS+=" $(get_pkg_directory PPSSPPSDL)/patches"
 
 PKG_LIBNAME="ppsspp_libretro.so"
-PKG_LIBPATH="lib/$PKG_LIBNAME"
+PKG_LIBPATH="lib/${PKG_LIBNAME}"
 
 pre_configure_target() {
   PKG_CMAKE_OPTS_TARGET="-DLIBRETRO=ON \
                          -DUSE_SYSTEM_FFMPEG=ON \
-                         -DUSING_X11_VULKAN=OFF --target clean"
+                         -DUSING_X11_VULKAN=OFF"
 
   if [ "${ARCH}" = "arm" ] && [ ! "${TARGET_CPU}" = "arm1176jzf-s" ]; then
     PKG_CMAKE_OPTS_TARGET+=" -DARMV7=ON"
@@ -47,7 +49,7 @@ pre_configure_target() {
                              -DUSING_GLES2=ON"
   fi
   
-if [ $ARCH == "aarch64" ]; then
+if [ ${ARCH} == "aarch64" ]; then
 PKG_CMAKE_OPTS_TARGET+=" -DARM64=ON"
 else
 PKG_CMAKE_OPTS_TARGET+=" -DARMV7=ON"
@@ -57,11 +59,11 @@ fi
 
 pre_make_target() {
   # fix cross compiling
-  find $PKG_BUILD -name flags.make -exec sed -i "s:isystem :I:g" \{} \;
-  find $PKG_BUILD -name build.ninja -exec sed -i "s:isystem :I:g" \{} \;
+  find ${PKG_BUILD} -name flags.make -exec sed -i "s:isystem :I:g" \{} \;
+  find ${PKG_BUILD} -name build.ninja -exec sed -i "s:isystem :I:g" \{} \;
 }
 
 makeinstall_target() {
-  mkdir -p $INSTALL/usr/lib/libretro
-  cp $PKG_LIBPATH $INSTALL/usr/lib/libretro/
+  mkdir -p ${INSTALL}/usr/lib/libretro
+  cp ${PKG_LIBPATH} ${INSTALL}/usr/lib/libretro/
 }
