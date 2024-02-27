@@ -19,7 +19,11 @@ BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 
 if [[ "$BTENABLED" == "1" ]]; then
 	# We don't need the BT agent while running games
-    systemctl stop bluetooth-agent
+	NPID=$(pgrep -f batocera-bluetooth-agent)
+
+	if [[ ! -z "$NPID" ]]; then
+		kill "$NPID"
+	fi
 fi
 
 # clear terminal window
@@ -30,7 +34,10 @@ fi
 
 arguments="$@"
 
-emuelec-utils setauddev
+#set audio device out according to emuelec.conf
+AUDIO_DEVICE="hw:$(get_ee_setting ee_audio_device)"
+[ $AUDIO_DEVICE = "hw:" ] &&  AUDIO_DEVICE="hw:0,0"
+sed -i "s|pcm \"hw:.*|pcm \"${AUDIO_DEVICE}\"|" /storage/.config/asound.conf
 
 # set audio to alsa
 set_audio alsa
@@ -115,6 +122,21 @@ export PATH
 
 fi
 
+# check if we started as host for a game
+if [[ "$arguments" == *"--host"* ]]; then
+    NETPLAY="${arguments##*--host}"  # read from --host onwards
+    NETPLAY="${NETPLAY%%--nick*}"  # until --nick is found
+    NETPLAY="--host $NETPLAY --nick"
+fi
+
+# check if we are trying to connect to a client on netplay
+if [[ "$arguments" == *"--connect"* ]]; then
+    NETPLAY="${arguments##*--connect}"  # read from --connect onwards
+    NETPLAY="${NETPLAY%%--nick*}"  # until --nick is found
+    NETPLAY="--connect $NETPLAY --nick"
+fi
+
+
 # Ports that use this file are all Libretro, so lets set it
 [[ ${PLATFORM} = "ports" ]] && LIBRETRO="yes"
 
@@ -171,25 +193,10 @@ case ${PLATFORM} in
             RUNTHIS='${TBASH} flycast.sh "${ROMNAME}"'
         fi
 		;;
-	"psx")
-		if [ "$EMU" = "duckstation" ]; then
-            set_kill_keys "duckstation-nogui"
-            RUNTHIS='${TBASH} duckstation.sh "${ROMNAME}"'
-        fi
-		;;
-	"mame"|"arcade"|"cps1"|"cps2"|"cps3")
+	"mame"|"arcade"|"capcom"|"cps1"|"cps2"|"cps3")
 		if [ "$EMU" = "AdvanceMame" ]; then
             set_kill_keys "advmame"
             RUNTHIS='${TBASH} advmame.sh "${ROMNAME}"'
-		elif [ "$EMU" = "FbneoSA" ]; then
-            set_kill_keys "fbneo"
-            RUNTHIS='fbneo.sh "${ROMNAME}"'
-		fi
-		;;
-	"fbn"|"neogeo")
-        if [ "$EMU" = "FbneoSA" ]; then
-            set_kill_keys "fbneo"
-            RUNTHIS='fbneo.sh "${ROMNAME}"'
 		fi
 		;;
 	"nds")
@@ -197,13 +204,10 @@ case ${PLATFORM} in
 		RUNTHIS='${TBASH} /storage/.emulationstation/scripts/drastic.sh "${ROMNAME}"'
 		;;
 	"n64")
-		if [ "$EMU" = "rice" ]; then
+		if [ "$EMU" = "M64P" ]; then
             set_kill_keys "mupen64plus"
             RUNTHIS='${TBASH} m64p.sh "${ROMNAME}"'
-		elif [ "$EMU" = "glide64mk2" ]; then
-            set_kill_keys "mupen64plus"
-            RUNTHIS='${TBASH} m64p.sh "${ROMNAME}" m64p_gl64mk2'
-        fi
+		fi
 		;;
 	"amiga"|"amigacd32")
 		if [ "$EMU" = "AMIBERRY" ]; then
@@ -261,9 +265,6 @@ case ${PLATFORM} in
 	"neocd")
 		if [ "$EMU" = "fbneo" ]; then
             RUNTHIS='${RABIN} $VERBOSE -L /tmp/cores/fbneo_libretro.so --subsystem neocd --config ${RACONF} "${ROMNAME}"'
-		elif [ "$EMU" = "FbneoSA" ]; then
-            set_kill_keys "fbneo"
-            RUNTHIS='fbneo.sh "${ROMNAME}" NCD'
 		fi
 		;;
 	"mplayer")
@@ -279,7 +280,7 @@ case ${PLATFORM} in
             set_kill_keys "chocolate-doom"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
             RUNTHIS='${TBASH} chocodoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
-        elif [ "$EMU" = "LZDoom" ]; then
+	elif [ "$EMU" = "LZDoom" ]; then
 	    set_kill_keys "lzdoom"
             CONTROLLERCONFIG="${arguments#*--controllers=*}"
             RUNTHIS='${TBASH} lzdoom.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
@@ -298,16 +299,10 @@ case ${PLATFORM} in
             RUNTHIS='${TBASH} gmloader.sh "${ROMNAME}" --controllers="${CONTROLLERCONFIG}"'
         ;;
 	"intellivision")
-        if [ "$EMU" = "jzintv" ]; then
+    if [ "$EMU" = "jzintv" ]; then
             set_kill_keys "jzintv"
             RUNTHIS='jzintv.sh "${ROMNAME}"'
-        fi
-        ;;
-	"saturn")
-        if [ "$EMU" = "yabasanshiroSA" ]; then
-            set_kill_keys "yabasanshiro"
-            RUNTHIS='yabasanshiro.sh "${ROMNAME}"'
-        fi
+    fi
         ;;
 	esac
 elif [ ${LIBRETRO} == "yes" ]; then
@@ -339,29 +334,8 @@ CORE=${EMU%%_*}
 # Netplay
 
 # make sure the ip and port are blank
-set_ee_setting "netplay.server.ip" "disable"
-set_ee_setting "netplay.server.port" "disable"
-set_ee_setting "netplay.mode" "disable"
-
-# check if we started as host for a game
-if [[ "$arguments" == *"--host"* ]]; then
-    NETPLAY="${arguments##*--host}"  # read from --host onwards
-    NETPLAY="${NETPLAY%%--nick*}"  # until --nick is found
-    NETPLAY="--host $NETPLAY --nick"
-fi
-
-# check if we are trying to connect to a client on netplay
-if [[ "$arguments" == *"--connect"* ]]; then
-    NETPLAY="${arguments##*--connect}"  # read from --connect onwards
-    NETPLAY="${NETPLAY%%--nick*}"  # until --nick is found
-    NETPLAY="--connect $NETPLAY --nick"
-    set_ee_setting "netplay.mode" "client"
-fi
-
-# check if we are trying to connect as spectator on netplay
-if [[ "$arguments" == *"--netplaymode spectator"* ]]; then
-    set_ee_setting "netplay.mode" "spectator"
-fi
+set_ee_setting "netplay.client.ip" "disable"
+set_ee_setting "netplay.client.port" "disable"
 
 if [[ ${NETPLAY} != "No" ]]; then
     NETPLAY_NICK=$(get_ee_setting netplay.nickname)
@@ -374,8 +348,8 @@ if [[ ${NETPLAY} != "No" ]]; then
         NETPLAY_PORT="${NETPLAY_PORT%% *}"  # until a space is found
         NETPLAY_IP="${arguments##*--connect }"  # read from -netplayip  onwards
         NETPLAY_IP="${NETPLAY_IP%% *}"  # until a space is found
-        set_ee_setting "netplay.server.ip" "${NETPLAY_IP}"
-        set_ee_setting "netplay.server.port" "${NETPLAY_PORT}"
+        set_ee_setting "netplay.client.ip" "${NETPLAY_IP}"
+        set_ee_setting "netplay.client.port" "${NETPLAY_PORT}"
     fi
 fi
 # End netplay
@@ -479,7 +453,10 @@ set_audio default
 
 if [[ "$BTENABLED" == "1" ]]; then
 	# Restart the bluetooth agent
-    systemctl start bluetooth-agent
+	NPID=$(pgrep -f batocera-bluetooth-agent)
+	if [[ -z "$NPID" ]]; then
+	(systemd-run batocera-bluetooth-agent) || :
+	fi
 fi
 
 if [ "$EE_DEVICE" == "OdroidGoAdvance" ]; then
@@ -509,9 +486,6 @@ fi
 
 # Chocolate Doom does not like to be killed?
 [[ "$EMU" = "Chocolate-Doom" ]] && ret_error="0"
-
-# YabasanshiroSA does not like to be killed?
-[[ "$EMU" = "yabasanshiroSA" ]] && ret_error="0"
 
 # Temp fix for retrorun always erroing out on exit
 [[ "${RETRORUN}" == "yes" ]] && ret_error=0

@@ -8,7 +8,7 @@ TimeoutStopSec=1
 Restart=always
 RestartSec=2
 StartLimitInterval=0
-Type=exec
+Type=forking
 
 [Install]
 WantedBy=kodi.target

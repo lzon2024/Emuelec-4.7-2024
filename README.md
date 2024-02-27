@@ -25,10 +25,14 @@ $ apt install gcc make git unzip wget xz-utils libsdl2-dev libsdl2-mixer-dev lib
 To build EmuELEC locally do the following:
 
 ```
-$ git clone https://github.com/EmuELEC/EmuELEC.git
+$ git clone https://github.com/shantigilbert/EmuELEC.git
 $ cd EmuELEC
-$ git checkout dev
-$ PROJECT=Amlogic-ce DEVICE=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
+$ git checkout master
+$ PROJECT=Amlogic ARCH=aarch64 DISTRO=EmuELEC make image
+```
+For the Odroid N2/S905X2/S905X3/A311D:
+```
+$ PROJECT=Amlogic-ng ARCH=aarch64 DISTRO=EmuELEC make image
 ```
 
 For the Odroid GO Advance/Super:

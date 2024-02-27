@@ -2,12 +2,12 @@
 # Copyright (C) 2021-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="freej2me"
-PKG_VERSION="a32e5b2c6d6947079ed4cc3acbf8cca9ea89468f"
-PKG_SHA256="968b8ee9e1fc3b412764d7d4fa3add672bb21b4af9e602670e46d20fc517edc6"
+PKG_VERSION="560859c84d26f27cfa264555d1c856aeb630c13a"
+PKG_SHA256="d343da4dc4db31d40fd97cbe584f9f92c3992e12189a909ca8e65c753df443aa"
 PKG_ARCH="any"
 PKG_SITE="https://github.com/hex007/freej2me"
 PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
-PKG_DEPENDS_TARGET="toolchain SDL2 libogg libvorbisidec libvpx libpng apache-ant:host"
+PKG_DEPENDS_TARGET="toolchain SDL2-git libogg libvorbisidec libvpx libpng apache-ant:host"
 PKG_SHORTDESC="A free J2ME emulator with libretro, awt and sdl2 frontends."
 PKG_TOOLCHAIN="make"
 

@@ -3,13 +3,13 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="audioencoder.flac"
-PKG_VERSION="20.2.0-Nexus"
-PKG_SHA256="71daf8c35bbf644591600fef93412cd068a6bf6173d2258dc243ee04c8e5b091"
+PKG_VERSION="2.0.6-Leia"
+PKG_SHA256="42e18fc2477ce5abc3efd89851a4bacc6b9436889a607a15f8232ef68b297f93"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/audioencoder.flac"
-PKG_URL="https://github.com/xbmc/audioencoder.flac/archive/${PKG_VERSION}.tar.gz"
+PKG_URL="https://github.com/xbmc/audioencoder.flac/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain kodi-platform flac"
 PKG_SECTION=""
 PKG_SHORTDESC="audioencoder.flac: A audioencoder addon for Kodi"

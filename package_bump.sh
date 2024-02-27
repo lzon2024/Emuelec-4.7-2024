@@ -5,8 +5,7 @@
 
 [ -z "$BUMPS" ] && BUMPS="yes"
 [ -z "$LR_PKG_PATH" ] && LR_PKG_PATH="./packages"
-[ -z "$PROJECT" ] && PROJECT="Amlogic-ce"
-[ -z "$DEVICE" ] && DEVICE="Amlogic-ng"
+[ -z "$PROJECT" ] && PROJECT="Amlogic-ng"
 [ -z "$DISTRO" ] && DISTRO="EmuELEC"
 
 usage()

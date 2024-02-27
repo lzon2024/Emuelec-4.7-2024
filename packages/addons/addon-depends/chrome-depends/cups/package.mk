@@ -3,26 +3,27 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="cups"
-PKG_VERSION="2.4.0"
-PKG_SHA256="36338ebdc6e8b1d4af26471230c479ce4d691a11f90bb42ac6822d4f2bf002c5"
+PKG_VERSION="2.2.8"
+PKG_SHA256="8f87157960b9d80986f52989781d9de79235aa060e05008e4cf4c0a6ef6bca72"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.cups.org"
-PKG_URL="https://github.com/openprinting/cups/archive/v${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain gnutls zlib"
+PKG_URL="https://github.com/apple/cups/archive/v$PKG_VERSION.tar.gz"
+PKG_DEPENDS_TARGET="toolchain openssl zlib"
 PKG_LONGDESC="CUPS printing system."
-PKG_BUILD_FLAGS="+pic -sysroot"
+PKG_BUILD_FLAGS="+pic"
 
 PKG_CONFIGURE_OPTS_TARGET="--libdir=/usr/lib \
                            --disable-gssapi \
-                           --with-dnssd=no \
-                           --with-tls=gnutls
+                           --disable-avahi \
+                           --disable-systemd \
+                           --disable-launchd \
                            --disable-unit-tests"
 
 pre_configure_target() {
   cd ..
-  rm -rf .${TARGET_NAME}
+  rm -rf .$TARGET_NAME
 }
 
 makeinstall_target() {
-  make BUILDROOT="${INSTALL}" install
+  make BUILDROOT="$INSTALL/../.INSTALL_PKG"
 }

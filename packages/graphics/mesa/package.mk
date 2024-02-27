@@ -3,83 +3,103 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="mesa"
-PKG_VERSION="22.0.1"
-PKG_SHA256="c05f9682c54560b36e0afa70896233fc73f1ed715e10d1a028b0eb84fd04426f"
+PKG_VERSION="19.1.7"
+PKG_SHA256="97c9f6a6127bee5ab21c3fe63ff3e0bd73a7966415f92f66500b0b276b7150da"
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.mesa3d.org/"
-PKG_URL="https://mesa.freedesktop.org/archive/mesa-${PKG_VERSION}.tar.xz"
+PKG_URL="https://github.com/mesa3d/mesa/archive/mesa-$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain expat libdrm Mako:host"
 PKG_LONGDESC="Mesa is a 3-D graphics library with an API."
 PKG_TOOLCHAIN="meson"
+PKG_BUILD_FLAGS="+lto"
 
 get_graphicdrivers
 
-PKG_MESON_OPTS_TARGET="-Ddri-drivers= \
+PKG_MESON_OPTS_TARGET="-Ddri-drivers=${DRI_DRIVERS// /,} \
                        -Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
                        -Dgallium-extra-hud=false \
-                       -Dgallium-xvmc=disabled \
+                       -Dgallium-xvmc=false \
                        -Dgallium-omx=disabled \
                        -Dgallium-nine=false \
                        -Dgallium-opencl=disabled \
-                       -Dshader-cache=enabled \
-                       -Dshared-glapi=enabled \
+                       -Dvulkan-drivers= \
+                       -Dshader-cache=true \
+                       -Dshared-glapi=true \
                        -Dopengl=true \
-                       -Dgbm=enabled \
-                       -Degl=enabled \
-                       -Dvalgrind=disabled \
-                       -Dlibunwind=disabled \
-                       -Dlmsensors=disabled \
+                       -Dgbm=true \
+                       -Degl=true \
+                       -Dglvnd=false \
+                       -Dasm=true \
+                       -Dvalgrind=false \
+                       -Dlibunwind=false \
+                       -Dlmsensors=false \
                        -Dbuild-tests=false \
                        -Dselinux=false \
-                       -Dosmesa=false"
+                       -Dosmesa=none"
 
-if [ "${DISPLAYSERVER}" = "x11" ]; then
-  PKG_DEPENDS_TARGET+=" xorgproto libXext libXdamage libXfixes libXxf86vm libxcb libX11 libxshmfence libXrandr libglvnd"
+if [ "$DISPLAYSERVER" = "x11" ]; then
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET xorgproto libXext libXdamage libXfixes libXxf86vm libxcb libX11 libxshmfence libXrandr"
   export X11_INCLUDES=
-  PKG_MESON_OPTS_TARGET+=" -Dplatforms=x11 -Ddri3=enabled -Dglx=dri -Dglvnd=true"
-elif [ "${DISPLAYSERVER}" = "wl" ]; then
-  PKG_DEPENDS_TARGET+=" wayland wayland-protocols libglvnd"
-  PKG_MESON_OPTS_TARGET+=" -Dplatforms=wayland -Ddri3=disabled -Dglx=disabled -Dglvnd=true"
+  PKG_MESON_OPTS_TARGET+=" -Dplatforms=x11,drm -Ddri3=true -Dglx=dri"
+elif [ "$DISPLAYSERVER" = "weston" ]; then
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET wayland wayland-protocols"
+  PKG_MESON_OPTS_TARGET+=" -Dplatforms=wayland,drm -Ddri3=false -Dglx=disabled"
 else
-  PKG_MESON_OPTS_TARGET+=" -Dplatforms="" -Ddri3=disabled -Dglx=disabled -Dglvnd=false"
+  PKG_MESON_OPTS_TARGET+=" -Dplatforms=drm -Ddri3=false -Dglx=disabled"
 fi
 
-if [ "${LLVM_SUPPORT}" = "yes" ]; then
-  PKG_DEPENDS_TARGET+=" elfutils llvm"
-  PKG_MESON_OPTS_TARGET+=" -Dllvm=enabled"
+if [ "$LLVM_SUPPORT" = "yes" ]; then
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET elfutils llvm"
+  export LLVM_CONFIG="$SYSROOT_PREFIX/usr/bin/llvm-config-host"
+  PKG_MESON_OPTS_TARGET+=" -Dllvm=true"
 else
-  PKG_MESON_OPTS_TARGET+=" -Dllvm=disabled"
+  PKG_MESON_OPTS_TARGET+=" -Dllvm=false"
 fi
 
-if [ "${VDPAU_SUPPORT}" = "yes" -a "${DISPLAYSERVER}" = "x11" ]; then
-  PKG_DEPENDS_TARGET+=" libvdpau"
-  PKG_MESON_OPTS_TARGET+=" -Dgallium-vdpau=enabled"
+if [ "$VDPAU_SUPPORT" = "yes" -a "$DISPLAYSERVER" = "x11" ]; then
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libvdpau"
+  PKG_MESON_OPTS_TARGET+=" -Dgallium-vdpau=true"
 else
-  PKG_MESON_OPTS_TARGET+=" -Dgallium-vdpau=disabled"
+  PKG_MESON_OPTS_TARGET+=" -Dgallium-vdpau=false"
 fi
 
-if [ "${VAAPI_SUPPORT}" = "yes" ] && listcontains "${GRAPHIC_DRIVERS}" "(r600|radeonsi)"; then
-  PKG_DEPENDS_TARGET+=" libva"
-  PKG_MESON_OPTS_TARGET+=" -Dgallium-va=enabled"
+if [ "$VAAPI_SUPPORT" = "yes" ] && listcontains "$GRAPHIC_DRIVERS" "(r600|radeonsi)"; then
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libva"
+  PKG_MESON_OPTS_TARGET+=" -Dgallium-va=true"
 else
-  PKG_MESON_OPTS_TARGET+=" -Dgallium-va=disabled"
+  PKG_MESON_OPTS_TARGET+=" -Dgallium-va=false"
 fi
 
-if listcontains "${GRAPHIC_DRIVERS}" "vmware"; then
-  PKG_MESON_OPTS_TARGET+=" -Dgallium-xa=enabled"
+if listcontains "$GRAPHIC_DRIVERS" "vmware"; then
+  PKG_MESON_OPTS_TARGET+=" -Dgallium-xa=true"
 else
-  PKG_MESON_OPTS_TARGET+=" -Dgallium-xa=disabled"
+  PKG_MESON_OPTS_TARGET+=" -Dgallium-xa=false"
 fi
 
-if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
-  PKG_MESON_OPTS_TARGET+=" -Dgles1=disabled -Dgles2=enabled"
+if [ "$OPENGLES_SUPPORT" = "yes" ]; then
+  PKG_MESON_OPTS_TARGET+=" -Dgles1=false -Dgles2=true"
 else
-  PKG_MESON_OPTS_TARGET+=" -Dgles1=disabled -Dgles2=disabled"
+  PKG_MESON_OPTS_TARGET+=" -Dgles1=false -Dgles2=false"
 fi
 
-if [ "${VULKAN_SUPPORT}" = "yes" ]; then
-  PKG_DEPENDS_TARGET+=" ${VULKAN} vulkan-tools"
-  PKG_MESON_OPTS_TARGET+=" -Dvulkan-drivers=${VULKAN_DRIVERS_MESA// /,}"
-else
-  PKG_MESON_OPTS_TARGET+=" -Dvulkan-drivers="
-fi
+# Temporary workaround:
+# Listed libraries are static, while mesa expects shared ones. This breaks the
+# dependency tracking. The following has some ideas on how to address that.
+# https://github.com/LibreELEC/LibreELEC.tv/pull/2163
+pre_configure_target() {
+  if [ "$DISPLAYSERVER" = "x11" ]; then
+    export LIBS="-lxcb-dri3 -lxcb-dri2 -lxcb-xfixes -lxcb-present -lxcb-sync -lxshmfence -lz"
+  fi
+}
+
+post_makeinstall_target() {
+  # Similar hack is needed on EGL, GLES* front. Might as well drop it and test the GLVND?
+  if [ "$DISPLAYSERVER" = "x11" ]; then
+    # rename and relink for cooperate with nvidia drivers
+    rm -rf $INSTALL/usr/lib/libGL.so
+    rm -rf $INSTALL/usr/lib/libGL.so.1
+    ln -sf libGL.so.1 $INSTALL/usr/lib/libGL.so
+    ln -sf /var/lib/libGL.so $INSTALL/usr/lib/libGL.so.1
+    mv $INSTALL/usr/lib/libGL.so.1.2.0 $INSTALL/usr/lib/libGL_mesa.so.1
+  fi
+}

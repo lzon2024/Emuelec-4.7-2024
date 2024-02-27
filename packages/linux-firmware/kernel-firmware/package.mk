@@ -2,8 +2,7 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="kernel-firmware"
-PKG_VERSION="20220209"
-PKG_SHA256="2fd289256b6127a6528b2243e0227bfe1750833c725b5c9139fad183e94d4172"
+PKG_VERSION="20231030"
 PKG_LICENSE="other"
 PKG_SITE="https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/"
 PKG_URL="https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/snapshot/${PKG_VERSION}.tar.gz"
@@ -78,12 +77,6 @@ makeinstall_target() {
 
   # brcm pcie firmware is only needed by x86_64
   [ "${TARGET_ARCH}" != "x86_64" ] && rm -fr ${FW_TARGET_DIR}/brcm/*-pcie.*
-
-  # Upstream doesn't name the file correctly so we need to symlink it
-  if [ -f "${FW_TARGET_DIR}/rtl_bt/rtl8723bs_config-OBDA8723.bin" ]; then
-    #cd "${FW_TARGET_DIR}/rtl_bt"
-    ln -s "rtl8723bs_config-OBDA8723.bin" "${FW_TARGET_DIR}/rtl_bt/rtl8723bs_config.bin"
-  fi
 
   # Cleanup - which may be project or device specific
   find_file_path scripts/cleanup.sh && ${FOUND_PATH} ${FW_TARGET_DIR} || true

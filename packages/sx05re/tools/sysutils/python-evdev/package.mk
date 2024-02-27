@@ -7,7 +7,7 @@ PKG_VERSION="5adc2abf1ec8a02c05c80cb1b3e34ba1d4237803"
 PKG_LICENSE="OSS"
 PKG_SITE="https://github.com/gvalkov/python-evdev"
 PKG_URL="$PKG_SITE.git"
-PKG_DEPENDS_TARGET="toolchain Python3:host Python3 distutilscross:host"
+PKG_DEPENDS_TARGET="toolchain Python3:host Python3 distutilscross:host Python2"
 PKG_LONGDESC="Userspace evdev events"
 PKG_TOOLCHAIN="manual"
 
@@ -42,10 +42,10 @@ fi
   # file names use the arch from the host system
   # tried to solve it but couldn't so I move them to the correct names for python
   # to grab them
-  mv ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}/site-packages/evdev/_ecodes.cpython-39-* \
-    ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}/site-packages/evdev/_ecodes.cpython-39-${libname}
-  mv ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}/site-packages/evdev/_input.cpython-39-* \
-    ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}/site-packages/evdev/_input.cpython-39-${libname}
-  mv ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}/site-packages/evdev/_uinput.cpython-39-* \
-    ${INSTALL}/usr/lib/${PKG_PYTHON_VERSION}/site-packages/evdev/_uinput.cpython-39-${libname}
+  mv ${INSTALL}/usr/lib/python3.7/site-packages/evdev/_ecodes.cpython-37-* \
+    ${INSTALL}/usr/lib/python3.7/site-packages/evdev/_ecodes.cpython-37-${libname}
+  mv ${INSTALL}/usr/lib/python3.7/site-packages/evdev/_input.cpython-37-* \
+    ${INSTALL}/usr/lib/python3.7/site-packages/evdev/_input.cpython-37-${libname}
+  mv ${INSTALL}/usr/lib/python3.7/site-packages/evdev/_uinput.cpython-37-* \
+    ${INSTALL}/usr/lib/python3.7/site-packages/evdev/_uinput.cpython-37-${libname}
 }

@@ -17,7 +17,7 @@ export CFLAGS="-Wall -O2"
 make_target() {
 make fbpad
 
-if [ "${DEVICE}" == "Amlogic-old" ]; then
+if [ ${PROJECT} == "Amlogic" ]; then
 	sed -i "s|unsigned int|unsigned short|" $PKG_BUILD/conf.h
 	mv fbpad fbpad32
 	make fbpad
@@ -26,7 +26,7 @@ fi
 
 makeinstall_target() {
 	mkdir -p $INSTALL/usr/bin
-if [ "${DEVICE}" == "Amlogic-old" ]; then
+if [ ${PROJECT} == "Amlogic" ]; then
 	cp fbpad32 $INSTALL/usr/bin/fbpad
 	cp fbpad $INSTALL/usr/bin/fbpad16
 else

@@ -2,13 +2,13 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="game.libretro.sameboy"
-PKG_VERSION="0.14.7.27-Matrix"
-PKG_SHA256="384c9b41f327caef1e8c9be2bcacabe4c116d4f748261b7360a470eb30503f90"
+PKG_VERSION="0.12.0.11-Leia"
+PKG_SHA256="1ca88f25a951f59aca8eb3dd1a0700312528e6dd09729881dbf8dfd9d5467083"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-game/game.libretro.sameboy"
-PKG_URL="https://github.com/kodi-game/game.libretro.sameboy/archive/${PKG_VERSION}.tar.gz"
+PKG_URL="https://github.com/kodi-game/game.libretro.sameboy/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain kodi-platform libretro-sameboy"
 PKG_SECTION=""
 PKG_LONGDESC="game.libretro.sameboy: SameBoy emulator for Kodi"

@@ -17,28 +17,6 @@ if [ ! -L "$CONFIG_DIR" ]; then
 ln -sf $CONFIG_DIR2 $CONFIG_DIR
 fi
 
-if [ "${EE_DEVICE}" == "Amlogic" ]; then
-  rm /storage/.config/asound.conf > /dev/null 2>&1
-  cp /storage/.config/asound.conf-amlogic /storage/.config/asound.conf
-
-    if [ "$(get_es_setting bool StopMusicOnScreenSaver)" != "false" ]; then 
-        sed -i "/<bool name=\"StopMusicOnScreenSaver.*/d" "${ES_CONF}"
-        sed -i "s|</config>|	<bool name=\"StopMusicOnScreenSaver\" value=\"false\" />\n</config>|g" "${ES_CONF}"
-    fi
-
-elif [ "${EE_DEVICE}" == "Amlogic-ng" ]; then
-  rm /storage/.config/asound.conf > /dev/null 2>&1
-  cp /storage/.config/asound.conf-amlogic-ng /storage/.config/asound.conf
-fi
-
-HOSTNAME=$(get_ee_setting system.hostname)
-if [ ! -z "${HOSTNAME}" ];then 
-    echo "${HOSTNAME}" > /storage/.cache/hostname
-else
-    echo "EMUELEC" > /storage/.cache/hostname
-fi
-cat /storage/.cache/hostname > /proc/sys/kernel/hostname
-
 if [[ "$EE_DEVICE" == "GameForce" ]]; then
 LED=$(get_ee_setting bl_rgb)
 [ -z "${LED}" ] && LED="Off"
@@ -68,10 +46,8 @@ BTENABLED=$(get_ee_setting ee_bluetooth.enabled)
 if [[ "$BTENABLED" != "1" ]]; then
 systemctl stop bluetooth
 rm /storage/.cache/services/bluez.conf & 
-else
-systemctl restart bluetooth
-systemctl restart bluetooth-agent
 fi
+
 
 # Mounts /storage/roms
 mount_romfs.sh 
@@ -83,13 +59,14 @@ cp -rf /usr/share/retroarch-overlays/bezels/* /storage/roms/bezels/ &
 fi
 
 # Restore config if backup exists
-BACKUPTAR="ee_backup_config.tar.gz"
-BACKUPFILE="/storage/roms/backup/${BACKUPTAR}"
+BACKUPFILE="ee_backup_config.tar.gz"
+BACKUPFILE="/storage/roms/backup/${BACKUPFILE}"
 
-[[ ! -f "${BACKUPFILE}" ]] && BACKUPFILE="/var/media/EEROMS/backup/${BACKUPTAR}"
+[[ ! -f "${BACKUPFILE}" ]] && BACKUPFILE="/var/media/EEROMS/backup/${BACKUPFILE}"
 
-if [ -f "${BACKUPFILE}" ]; then 
-	emuelec-utils ee_backup restore no > /emuelec/logs/last-restore.log 2>&1
+if [ -f ${BACKUPFILE} ]; then 
+	emuelec-utils ee_backup restore no
+	rm ${BACKUPFILE} &
 fi
 
 DEFE=""

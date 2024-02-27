@@ -1,9 +1,7 @@
 [Unit]
 Description=Setup machine-id
 DefaultDependencies=no
-Conflicts=shutdown.target
-Before=systemd-journald.service systemd-tmpfiles-setup-dev.service shutdown.target
-After=local-fs.target
+Before=systemd-journald.service systemd-tmpfiles-setup-dev.service
 
 [Service]
 Type=oneshot

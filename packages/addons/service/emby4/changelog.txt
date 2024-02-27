@@ -1,6 +1,3 @@
-109
-- Bootstrap
-
 108
 - Update to 4.4.2.0
 - Fix system.d

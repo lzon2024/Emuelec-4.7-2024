@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="fceumm-mod"
-PKG_VERSION="f0ea52190427b136a51da4490e49087fe2ca2abb"
-PKG_SHA256="acfa9de9520db21bd36fd567a8d069970884e60ee021ede05211ad3f5ba9767e"
+PKG_VERSION="2ce3c904ce3eebe10e14dbeb6438f959ab6c88d2"
+PKG_SHA256="a3995719b567eded7d1d31ec2a89a4900730bf611071322a3afa5bafdd5464ff"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPLv2"
@@ -42,5 +42,5 @@ make_target() {
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro
-  cp ${PKG_BUILD}/fceumm_mod_libretro.* $INSTALL/usr/lib/libretro/
+  cp fceumm-mod_libretro.so $INSTALL/usr/lib/libretro/
 }

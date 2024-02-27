@@ -2,13 +2,13 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="game.libretro.dosbox"
-PKG_VERSION="0.74.0.15-Leia"
-PKG_SHA256="72eab7613b4da3fcb17b9771ab3962b37fcdbebfb39d40225c65ac5ba3ae966e"
+PKG_VERSION="0.74.0.6-Leia"
+PKG_SHA256="245f3e74c040f6d9d212b9b0d07df217547fc501ab15f0382636c7a29199fb70"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-game/game.libretro.dosbox"
-PKG_URL="https://github.com/kodi-game/game.libretro.dosbox/archive/${PKG_VERSION}.tar.gz"
+PKG_URL="https://github.com/kodi-game/game.libretro.dosbox/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain kodi-platform libretro-dosbox"
 PKG_SECTION=""
 PKG_LONGDESC="game.libretro.dosbox: DOSBox for Kodi"

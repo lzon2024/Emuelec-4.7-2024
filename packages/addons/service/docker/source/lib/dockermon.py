@@ -4,7 +4,7 @@
 
 from contextlib import closing
 from functools import partial
-from socket import socket, AF_UNIX, timeout
+from socket import socket, AF_UNIX
 from subprocess import Popen, PIPE
 from sys import stdout, version_info
 import json
@@ -70,14 +70,12 @@ def connect(url):
     return sock, hostname
 
 
-def watch(callback, url=default_sock_url, run=None):
+def watch(callback, url=default_sock_url):
     """Watch docker events. Will call callback with each new event (dict).
 
         url can be either tcp://<host>:port or ipc://<path>
     """
     sock, hostname = connect(url)
-    if run:
-        sock.settimeout(1.5)
     request = 'GET /events HTTP/1.1\nHost: %s\n\n' % hostname
     request = request.encode('utf-8')
 
@@ -91,13 +89,7 @@ def watch(callback, url=default_sock_url, run=None):
         # Messages are \r\n<size in hex><JSON payload>\r\n
         buf = [payload]
         while True:
-            try:
-                chunk = sock.recv(bufsize)
-            except timeout:
-                if run():
-                    continue
-            if run and not run():
-                raise DockermonError('stopped')
+            chunk = sock.recv(bufsize)
             if not chunk:
                 raise EOFError('socket closed')
             buf.append(chunk.decode('utf-8'))

@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 65ece36..bd7d670 100644
+index deb8820..aa13d3b 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -61,7 +61,7 @@ COBJFLAGS =
@@ -11,7 +11,7 @@ index 65ece36..bd7d670 100644
  LDFLAGSEMULATOR =
  
  GIT_VERSION ?= " $(shell git rev-parse --short HEAD || echo unknown)"
-@@ -104,27 +104,25 @@ ifeq ($(VRENDER),opengl)
+@@ -104,24 +104,22 @@ ifeq ($(VRENDER),opengl)
  	CCOMFLAGS  += -DHAVE_OPENGL
  endif
  
@@ -19,22 +19,18 @@ index 65ece36..bd7d670 100644
 -
 -ifeq ($(firstword $(filter x86_64,$(UNAME))),x86_64)
 +ifeq ($(firstword $(filter x86_64,$(ARCH))),x86_64)
- PTR64 ?= 1
+ PTR64 = 1
  endif
 -ifeq ($(firstword $(filter amd64,$(UNAME))),amd64)
 +ifeq ($(firstword $(filter amd64,$(ARCH))),amd64)
- PTR64 ?= 1
+ PTR64 = 1
  endif
 -ifeq ($(firstword $(filter ppc64,$(UNAME))),ppc64)
 +ifeq ($(firstword $(filter ppc64,$(ARCH))),ppc64)
- PTR64 ?= 1
+ PTR64 = 1
  endif
  ifneq (,$(findstring mingw64-w64,$(PATH)))
- PTR64 ?= 1
- endif
--ifeq ($(firstword $(filter arm64,$(UNAME))),arm64)
-+ifeq ($(firstword $(filter arm64,$(ARCH))),arm64)
- PTR64 ?= 1
+ PTR64=1
  endif
 -ifneq (,$(findstring Power,$(UNAME)))
 +ifneq (,$(findstring Power,$(ARCH)))
@@ -45,7 +41,7 @@ index 65ece36..bd7d670 100644
  BIGENDIAN=1
  endif
  
-@@ -146,14 +144,10 @@ ifeq ($(VRENDER),opengl)
+@@ -143,14 +141,10 @@ ifeq ($(VRENDER),opengl)
     LIBS += -lGL
  endif
  LDFLAGS += $(SHARED)
@@ -64,7 +60,7 @@ index 65ece36..bd7d670 100644
     CCOMFLAGS += $(PLATCFLAGS) -ffast-math  
     LIBS += -lstdc++ -lpthread 
  
-@@ -462,10 +456,13 @@ else ifneq (,$(findstring rpi,$(platform)))
+@@ -345,10 +339,13 @@ else ifneq (,$(findstring rpi,$(platform)))
  
  # ARM
  else ifneq (,$(findstring armv,$(platform)))
@@ -80,7 +76,7 @@ index 65ece36..bd7d670 100644
     LDFLAGS +=  $(SHARED)
     ARM_ENABLED = 1
     X86_SH2DRC = 0
-@@ -683,7 +680,7 @@ DEFS += -DFLAC__NO_DLL
+@@ -568,7 +565,7 @@ DEFS += -DFLAC__NO_DLL
  
  # CFLAGS is defined based on C or C++ targets
  # (remember, expansion only happens when used, so doing it here is ok)

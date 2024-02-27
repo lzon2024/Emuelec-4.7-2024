@@ -3,17 +3,17 @@
 
 PKG_NAME="dosbox-x"
 
-if [[ "${DEVICE}" == "Amlogic-old" ]]; then
+if [[ "${PROJECT}" == "Amlogic" ]]; then
 PKG_VERSION="286e859e08b60a04c0b4c2bc952432122c957a9c"
 PKG_SHA256="1a44710e38b05f67e76da74f46bbea4bb8b73ed4a28044575dfa24765bc65d7c"
 else
-PKG_VERSION="314ecadb18e1646409562ec519e846a6c62b8ff2"
-PKG_SHA256="110372d89eaa6c03df83581de1619f4bcd05bab604ca76207ce05776deea9351"
+PKG_VERSION="c7a970a43fae53a5b15eb792e907e993e0177486"
+PKG_SHA256="9bd32a30d33449a023d01889f4b193a7d5ff783ff94c2d118055ebe2aaee970c"
 fi
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/joncampbell123/dosbox-x"
 PKG_URL="$PKG_SITE/archive/${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain linux glibc glib systemd dbus alsa-lib SDL2 SDL2_net SDL_sound libpng zlib libvorbis flac libogg fluidsynth-git munt"
+PKG_DEPENDS_TARGET="toolchain linux glibc glib systemd dbus alsa-lib SDL2-git SDL2_net SDL_sound libpng zlib libvorbis flac libogg fluidsynth-git munt"
 PKG_LONGDESC="DOSBox-X fork of the DOSBox project."
 PKG_TOOLCHAIN="autotools"
 PKG_BUILD_FLAGS="+lto"

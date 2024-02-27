@@ -2,17 +2,16 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="lzdoom"
-PKG_VERSION="43e444889953e99a5b42d7c87ce67dfd351b696a" # version 3.88b
+PKG_VERSION="43865c19478fbf9e311414f1ffbc68278e60ba73"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/drfrag666/gzdoom"
 PKG_GIT_CLONE_BRANCH="g3.3mgw"
 PKG_URL="${PKG_SITE}.git"
-PKG_DEPENDS_TARGET="toolchain SDL2 lzdoom:host"
+PKG_DEPENDS_TARGET="toolchain SDL2-git lzdoom:host"
 PKG_SHORTDESC="LZDoom"
 PKG_LONGDESC="ZDoom is a family of enhanced ports of the Doom engine for running on modern operating systems. It runs on Windows, Linux, and OS X, and adds new features not found in the games as originally published by id Software."
 GET_HANDLER_SUPPORT="git"
 PKG_TOOLCHAIN="cmake-make"
-PKG_DEPENDS_HOST="toolchain:host SDL2:host"
 
 pre_build_host() {
 HOST_CMAKE_OPTS=""

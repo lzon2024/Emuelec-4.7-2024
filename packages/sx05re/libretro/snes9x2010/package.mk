@@ -19,8 +19,8 @@
 ################################################################################
 
 PKG_NAME="snes9x2010"
-PKG_VERSION="c98224bc74aa0bbf355d128b22e4a2a4e94215b0"
-PKG_SHA256="9a7725241ffbb8dbe3813f02e1ab6eadfcf758022974884d3851aa89f274a771"
+PKG_VERSION="f445ce418268d1c051c5997f6d4c01566c098ee8"
+PKG_SHA256="05649a8ad7de573601888e4e25c994c51cc7aa90f349370264c9bee16ab9402e"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="Non-commercial"

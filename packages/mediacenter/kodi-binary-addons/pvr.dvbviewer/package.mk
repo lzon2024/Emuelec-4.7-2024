@@ -3,13 +3,13 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="pvr.dvbviewer"
-PKG_VERSION="20.2.0-Nexus"
-PKG_SHA256="f360cab6ae842ff428d76f44ae3ca374c3101871d2fa6a139e9d1d14e42a4372"
-PKG_REV="1"
+PKG_VERSION="3.7.11-Leia"
+PKG_SHA256="8a3d167e652574caf30ba0ce9c22d278715e0237774b817e37826f1b2d647bff"
+PKG_REV="4"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-pvr/pvr.dvbviewer"
-PKG_URL="https://github.com/kodi-pvr/pvr.dvbviewer/archive/${PKG_VERSION}.tar.gz"
+PKG_URL="https://github.com/kodi-pvr/pvr.dvbviewer/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain kodi-platform"
 PKG_SECTION=""
 PKG_SHORTDESC="pvr.dvbviewer"

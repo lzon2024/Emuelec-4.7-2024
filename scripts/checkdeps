@@ -2,33 +2,40 @@
 
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
-# Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2018 Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
-set -e
-
-# set up variables
-declare -A dep_map file_map perl_map need_map
-DEBUG="false"
+. config/options ""
 
 get_deps() {
-  # start from a blank slate
-  need_map=()
+  need=()
+  need_pkg=()
 
-  for key in "${!dep_map[@]}"; do
-    if ! command -v "${key}" >/dev/null; then
-      need_map["${key}"]="${dep_map[${key}]}"
+  for i in "${!deps[@]}"; do
+    dep=${deps[${i}]}
+    dep_pkg=${deps_pkg[${i}]}
+    if ! command -v "${dep}" >/dev/null; then
+      need+=(${dep})
+      need_pkg+=("${dep_pkg}")
     fi
   done
 
-  for key in "${!file_map[@]}"; do
-    if [ ! -f "${key}" ]; then
-      need_map["${key}"]="${file_map[${key}]}"
+  for i in "${!files[@]}"; do
+    file=${files[${i}]}
+    file_pkg=${files_pkg[${i}]}
+    if [ ! -f "${file}" ]; then
+      need+=(${file})
+      need_pkg+=("${file_pkg}")
     fi
   done
 
-  for key in "${!perl_map[@]}"; do
-    if ! perl -M"${key}" -e exit 2>/dev/null; then
-      need_map["perl::${key}"]="${perl_map[${key}]}"
+  for i in "${!perl_mod[@]}"; do
+    mod=${perl_mod[${i}]}
+    pkg=${perl_pkg[${i}]}
+
+    if ! perl -M"${mod}" -e exit 2>/dev/null; then
+      need+=(perl::${mod})
+      need_pkg+=(${pkg})
     fi
   done
 }
@@ -36,12 +43,11 @@ get_deps() {
 get_yes_no()
 {
   local ans
-  read -p "Would you like to install the needed tools? (y/n)" ans
+  read -p "Would you like to install the needed tools? (y/n) " ans
   [ "${ans,,}" = "y" ] && return 0
   [ "${ans,,}" = "yes" ] && return 0
   return 1
 }
-
 
 if  [ -f /etc/lsb-release ]; then
   DISTRO=$(grep DISTRIB_ID /etc/lsb-release | cut -d "=" -f 2)
@@ -53,227 +59,110 @@ fi
 
 DISTRO=${DISTRO,,}
 
-# [program]=package
-dep_map=(
-  [bash]=bash
-  [bc]=bc
-  [bzip2]=bzip2
-  [diff]=diffutils
-  [gawk]=gawk
-  [gcc]=gcc
-  [gperf]=gperf
-  [gzip]=gzip
-  [file]=file
-  [lsdiff]=patchutils
-  [lzop]=lzop
-  [make]=make
-  [patch]=patch
-  [perl]=perl
-  [sed]=sed
-  [tar]=tar
-  [unzip]=unzip
-  [wget]=wget
-  [xz]=xz-utils
-  [zip]=zip
-  [zstd]=zstd
-)
+deps=(wget bash bc gcc sed patch lsdiff tar bzip2 gzip perl gawk gperf zip unzip diff lzop go curl patchelf)
+deps_pkg=(wget bash bc gcc sed patch patchutils tar bzip2 gzip perl gawk gperf zip unzip diffutils lzop golang curl patchelf)
 
-# [file]=package
-file_map=(
-  [/usr/include/ncurses.h]=libncurses5-dev
-  [/usr/include/stdio.h]=libc6-dev
-)
+files=(/usr/include/stdio.h /usr/include/ncurses.h)
+files_pkg=(libc6-dev libncurses5-dev)
 
-# [module]=package
-perl_map=(
-  [JSON]=libjson-perl
-  [Parse::Yapp::Driver]=libparse-yapp-perl
-  [Thread::Queue]=perl
-  [XML::Parser]=libxml-parser-perl
-)
+perl_mod=(JSON XML::Parser)
 
-### PROJECT SPECIFIC REQUIREMENTS ###
-# Extend build scripts to look for distro/project/device checkdep scripts before adding further checks here
-# Native aarch64 on debian host needs to support rkbin (Rockchip) and aml_encrypt_* (Amlogic)
-if [ "$(uname -m)" = "aarch64" ] && [ "${PROJECT}" = "Rockchip" -o "${PROJECT}" = "Amlogic" ]; then
-  dep_map[qemu-x86_64]=qemu-user-binfmt
-  if [ ! -f /lib64/ld-linux-x86-64.so.2 -o ! -f /lib/x86_64-linux-gnu/libc.so.6 ]; then
-    echo -e "Copy from a working x86_64 system:\n\t/lib64/ld-linux-x86-64.so.2\n\t/lib/x86_64-linux-gnu/libc.so.6"
-  fi
-  file_map[/lib64/ld-linux-x86-64.so.2]="libc6:amd64"
-  file_map[/lib/x86_64-linux-gnu/libc.so.6]="libc6:amd64"
-fi
-
-if [ "$(uname -m)" = "aarch64" -a "${PROJECT}" = "Amlogic-ce" ]; then
-  dep_map[qemu-x86_64]=qemu-user-binfmt
-fi
-
-# remap or add [depend]=package needs based on host distro
 case "${DISTRO}" in
     fedora|centos|rhel)
-      dep_map+=(
-        [g++]=gcc-c++
-        [mkfontscale]=xorg-x11-font-utils
-        [mkfontdir]=xorg-x11-font-utils
-        [bdftopcf]=xorg-x11-font-utils
-        [xsltproc]=libxslt
-        [java]=java-1.8.0-openjdk
-        [python3]=python3
-        [rpcgen]=rpcgen
-      )
+      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python)
+      deps_pkg+=(gcc-c++ xorg-x11-font-utils xorg-x11-font-utils xorg-x11-font-utils libxslt java-1.7.0-openjdk python2)
       if [[ ! $(rpm -qa glibc-static) ]]; then
-        dep_map+=(
-          [glibc-static]=glibc-static
-        )
+        deps+=(glibc-static)
+        deps_pkg+=(glibc-static)
       fi
       if [[ ! $(rpm -qa libstdc++-static) ]]; then
-        dep_map+=(
-          [libstdc++-static]=libstdc++-static
-        )
+        deps+=(libstdc++-static)
+        deps_pkg+=(libstdc++-static)
       fi
-      file_map+=(
-        [/usr/include/ncurses.h]=ncurses-devel
-        [/usr/include/stdio.h]=glibc-headers
-      )
-      perl_map+=(
-        [JSON]=perl-JSON
-        [Parse::Yapp::Driver]=perl-Parse-Yapp
-        [Thread::Queue]=perl-Thread-Queue
-        [XML::Parser]=perl-XML-Parser
-        [FindBin]=perl-FindBin
-        [File::Compare]=perl-File-Compare
-        [File::Copy]=perl-File-Copy
-      )
+      files_pkg=(glibc-headers ncurses-devel)
+      perl_pkg=(perl-JSON perl-XML-parser)
       ;;
     gentoo|sabayon)
-      dep_map+=(
-        [g++]="gcc[cxx]"
-        [mkfontscale]=mkfontscale
-        [bdftopcf]=bdftopcf
-        [xsltproc]=libxslt
-        [java]=virtual/jre
-        [python3]=python
-        [rpcgen]=net-libs/rpcsvc-proto
-      )
-      file_map+=(
-        [/usr/include/stdio.h]=glibc
-        [/usr/include/ncurses.h]=ncurses
-      )
-      perl_map+=(
-        [JSON]=JSON
-        [Parse::Yapp::Driver]=perl-Parse-Yapp
-        [Thread::Queue]=perl-Thread-Queue
-        [XML::Parser]=XML-Parser
-      )
+      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python)
+      deps_pkg+=("gcc[cxx]" mkfontscale mkfontdir bdftopcf libxslt virtual/jre python)
+      files_pkg=(glibc ncurses)
+      perl_pkg=(JSON XML-Parser)
       ;;
-    arch)
-      dep_map+=(
-        [g++]=g++
-        [mkfontscale]=xorg-mkfontscale
-        [mkfontdir]=xorg-mkfontdir
-        [bdftopcf]=xorg-bdftopcf
-        [xsltproc]=libxslt
-        [java]="java-runtime-common jdk8-openjdk"
-        [python3]=python3
-        [rpcgen]=rpcsvc-proto
-      )
-      perl_map+=(
-        [JSON]=perl-json
-        [XML::Parser]=perl-xml-parser
-        [Thread::Queue]=perl
-        [Parse::Yapp::Driver]=perl-parse-yapp
-      )
+    arch|manjaro)
+      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python)
+      deps_pkg+=(g++ xorg-mkfontscale xorg-mkfontdir xorg-bdftopcf libxslt "java-runtime-common jdk8-openjdk" python2)
+      perl_pkg=(perl-json perl-xml-parser)
       ;;
     opensuse)
-      dep_map+=(
-        [g++]=gcc-c++
-        [mkfontscale]=mkfontscale
-        [mkfontdir]=mkfontdir
-        [bdftopcf]=bdftopcf
-        [xsltproc]=libxslt-tools
-        [java]=java-1_8_0-openjdk
-        [python3]=python3
-      )
+      deps+=( g++ mkfontscale mkfontdir bdftopcf xsltproc java python)
+      deps_pkg+=(gcc-c++ mkfontscale mkfontdir bdftopcf libxslt-tools java-1_8_0-openjdk python)
       if [[ ! $(rpm -qa glibc-devel-static) ]]; then
-        dep_map+=(
-          [glibc-devel-static]=glibc-devel-static
-        )
+        deps+=(glibc-devel-static)
+        deps_pkg+=(glibc-devel-static)
       fi
-      perl_map+=(
-        [JSON]=perl-JSON
-        [XML::Parser]=perl-XML-Parser
-        [Thread::Queue]=perl
-        [Parse::Yapp::Driver]=perl-Parse-Yapp
-      )
+      perl_pkg=(perl-JSON perl-XML-Parser)
       ;;
     *)
-      dep_map+=(
-        [g++]=g++
-        [mkfontscale]=xfonts-utils
-        [mkfontdir]=xfonts-utils
-        [bdftopcf]=xfonts-utils
-        [xsltproc]=xsltproc
-        [java]=default-jre
-        [python3]=python3
-      )
+      deps+=(g++ mkfontscale mkfontdir bdftopcf xsltproc java python)
+      deps_pkg+=(g++ xfonts-utils xfonts-utils xfonts-utils xsltproc default-jre python)
+      perl_pkg=(libjson-perl libxml-parser-perl)
       ;;
 esac
 
-if [ "${DEBUG}" = "true" ]; then
-  echo "DEP MAP"
-  for key in "${!dep_map[@]}"; do
-    echo "${key}:${dep_map[${key}]}"
-  done
-  echo "FILE MAP"
-  for key in "${!file_map[@]}"; do
-    echo "${key}:${file_map[${key}]}"
-  done
-  echo "PERL MAP"
-  for key in "${!perl_map[@]}"; do
-    echo "${key}:${perl_map[${key}]}"
-  done
+# project specific dependencies
+if [ -n "${EXTRA_DEPS}" ] ; then
+  deps+=(${EXTRA_DEPS})
+fi
+if [ -n "${EXTRA_DEPS_PKG}" ] ; then
+  deps_pkg+=(${EXTRA_DEPS_PKG})
 fi
 
-### DEPENDENCY CHECKING AND INSTALLATION ###
+# distro specific dependencies
+if [ -n "${DISTRO_DEPS}" ] ; then
+  deps+=(${DISTRO_DEPS})
+fi
+if [ -n "${DISTRO_DEPS_PKG}" ] ; then
+  deps_pkg+=(${DISTRO_DEPS_PKG})
+fi
+
+# aarch64 dependencies
+if [ "$(uname -m)" == "aarch64" ]; then
+  deps+=(qemu-x86_64)
+  deps_pkg+=(qemu-user-binfmt)
+fi
+
 get_deps
 
-if [ "${DEBUG}" = "true" ]; then
-  echo "NEED MAP"
-  for key in "${!need_map[@]}"; do
-    echo "${key}:${need_map[${key}]}"
+if [ "${#need[@]}" -gt 0 ]; then
+  echo "**** Your system lacks the following tools needed to build ${DISTRONAME} ****"
+  for i in "${!need[@]}"; do
+    echo "${need[${i}]} provided by ${need_pkg[${i}]}"
   done
-fi
-
-if [ "${#need_map[@]}" -gt 0 ]; then
-  echo "**** This system lacks the following tools needed to build ${DISTRONAME} ****"
-  for key in "${!need_map[@]}"; do
-    echo "${key} provided by ${need_map[${key}]}"
-  done
-  echo "**** The system appears to be a ${DISTRO} system ****"
+  echo "**** You seem to use a ${DISTRO} system ****"
 
   if command -v sudo >/dev/null; then
     case "${DISTRO}" in
       ubuntu|debian|linuxmint|\"elementary\")
-        get_yes_no && sudo apt-get install "${need_map[@]}"
+        get_yes_no && sudo apt-get install "${need_pkg[@]}"
         ;;
       fedora|centos|rhel)
         command -v dnf >/dev/null && YUM=dnf || YUM=yum
-        get_yes_no && sudo ${YUM} install "${need_map[@]}"
+        get_yes_no && sudo ${YUM} install "${need_pkg[@]}"
         ;;
       gentoo)
-        get_yes_no && sudo emerge --ask --deep "${need_map[@]}"
+        get_yes_no && sudo emerge --ask --deep "${need_pkg[@]}"
         ;;
       sabayon)
-        get_yes_no && sudo equo install --ask "${need_map[@]}"
+        get_yes_no && sudo equo install --ask "${need_pkg[@]}"
         ;;
       mageia)
-        get_yes_no && sudo urpmi "${need_map[@]}"
+        get_yes_no && sudo urpmi "${need_pkg[@]}"
         ;;
-      arch)
-        get_yes_no && sudo pacman -Sy "${need_map[@]}"
+      arch|manjaro)
+        get_yes_no && sudo pacman -Sy "${need_pkg[@]}"
         ;;
       opensuse)
-        get_yes_no && sudo zypper install -y --no-recommends "${need_map[@]}"
+        get_yes_no && sudo zypper install -y --no-recommends "${need_pkg[@]}"
         ;;
       *)
         echo "**** unsupported distro ${DISTRO} ****"
@@ -282,17 +171,15 @@ if [ "${#need_map[@]}" -gt 0 ]; then
     esac
   else
     echo "The command 'sudo' was not found. Please install necessary packages manually."
-    exit 1
   fi
 fi
 
-# check if installed packages satisifed deps
 get_deps
 
-if [ "${#need_map[@]}" -gt 0 ]; then
+if [ "${#need[@]}" -gt 0 ]; then
   echo "**** The following packages were not installed correctly ****"
-  for key in "${!need_map[@]}"; do
-    echo "${key} provided by ${need_map[${key}]}"
+  for i in "${!need[@]}"; do
+    echo "${need[${i}]} provided by ${need_pkg[${i}]}"
   done
   echo "********"
   exit 1

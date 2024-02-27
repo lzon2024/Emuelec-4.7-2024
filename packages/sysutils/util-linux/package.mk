@@ -3,10 +3,10 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="util-linux"
-PKG_VERSION="2.38"
-PKG_SHA256="6d111cbe4d55b336db2f1fbeffbc65b89908704c01136371d32aa9bec373eb64"
+PKG_VERSION="2.35.2"
+PKG_SHA256="21b7431e82f6bcd9441a01beeec3d57ed33ee948f8a5b41da577073c372eb58a"
 PKG_LICENSE="GPL"
-PKG_URL="https://www.kernel.org/pub/linux/utils/util-linux/v$(get_pkg_version_maj_min)/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+PKG_URL="http://www.kernel.org/pub/linux/utils/util-linux/v${PKG_VERSION%.*}/$PKG_NAME-$PKG_VERSION.tar.xz"
 PKG_DEPENDS_HOST="ccache:host autoconf:host automake:host intltool:host libtool:host pkg-config:host"
 PKG_DEPENDS_TARGET="toolchain ncurses"
 PKG_DEPENDS_INIT="toolchain"
@@ -27,11 +27,11 @@ UTILLINUX_CONFIG_DEFAULT="--disable-gtk-doc \
                           --disable-use-tty-group \
                           --disable-makeinstall-chown \
                           --disable-makeinstall-setuid \
+                          --disable-widechar \
                           --with-gnu-ld \
                           --without-selinux \
                           --without-audit \
                           --without-udev \
-                          --without-ncurses \
                           --without-ncursesw \
                           --without-readline \
                           --without-slang \
@@ -45,7 +45,7 @@ UTILLINUX_CONFIG_DEFAULT="--disable-gtk-doc \
                           --without-python \
                           --without-systemdsystemunitdir"
 
-PKG_CONFIGURE_OPTS_TARGET="${UTILLINUX_CONFIG_DEFAULT} \
+PKG_CONFIGURE_OPTS_TARGET="$UTILLINUX_CONFIG_DEFAULT \
                            --enable-libuuid \
                            --enable-libblkid \
                            --enable-libmount \
@@ -54,27 +54,28 @@ PKG_CONFIGURE_OPTS_TARGET="${UTILLINUX_CONFIG_DEFAULT} \
                            --enable-fsck \
                            --enable-fstrim \
                            --enable-blkid \
-                           --enable-lsfd \
+                           --with-ncurses \
                            --enable-setterm \
-                           --with-ncursesw"
+						   --without-ncursesw \
+                           --enable-lscpu"
 
-if [ "${SWAP_SUPPORT}" = "yes" ]; then
-  PKG_CONFIGURE_OPTS_TARGET+=" --enable-swapon"
+if [ "$SWAP_SUPPORT" = "yes" ]; then
+  PKG_CONFIGURE_OPTS_TARGET="$PKG_CONFIGURE_OPTS_TARGET --enable-swapon"
 fi
 
 PKG_CONFIGURE_OPTS_HOST="--enable-static \
                          --disable-shared \
-                         ${UTILLINUX_CONFIG_DEFAULT} \
+                         $UTILLINUX_CONFIG_DEFAULT \
                          --enable-uuidgen \
                          --enable-libuuid"
 
-PKG_CONFIGURE_OPTS_INIT="${UTILLINUX_CONFIG_DEFAULT} \
+PKG_CONFIGURE_OPTS_INIT="$UTILLINUX_CONFIG_DEFAULT \
                          --enable-libblkid \
                          --enable-libmount \
                          --enable-fsck"
 
-if [ "${INITRAMFS_PARTED_SUPPORT}" = "yes" ]; then
-  PKG_CONFIGURE_OPTS_INIT+=" --enable-mkfs --enable-libuuid"
+if [ "$INITRAMFS_PARTED_SUPPORT" = "yes" ]; then
+  PKG_CONFIGURE_OPTS_INIT="$PKG_CONFIGURE_OPTS_INIT --enable-mkfs --enable-libuuid"
 fi
 
 pre_makeinstall_target() {
@@ -83,22 +84,20 @@ cp $PKG_BUILD/.$TARGET_NAME/setterm $INSTALL/usr/bin
 }
 
 post_makeinstall_target() {
-  if [ "${SWAP_SUPPORT}" = "yes" ]; then
-    mkdir -p ${INSTALL}/usr/lib/libreelec
-      cp -PR ${PKG_DIR}/scripts/mount-swap ${INSTALL}/usr/lib/libreelec
+  if [ "$SWAP_SUPPORT" = "yes" ]; then
+    mkdir -p $INSTALL/usr/lib/coreelec
+      cp -PR $PKG_DIR/scripts/mount-swap $INSTALL/usr/lib/coreelec
 
-    mkdir -p ${INSTALL}/etc
-      cat ${PKG_DIR}/config/swap.conf | \
-        sed -e "s,@SWAPFILESIZE@,${SWAPFILESIZE},g" \
-            -e "s,@SWAP_ENABLED_DEFAULT@,${SWAP_ENABLED_DEFAULT},g" \
-            > ${INSTALL}/etc/swap.conf
+    mkdir -p $INSTALL/etc
+      cat $PKG_DIR/config/swap.conf | \
+        sed -e "s,@SWAPFILESIZE@,$SWAPFILESIZE,g" \
+            -e "s,@SWAP_ENABLED_DEFAULT@,$SWAP_ENABLED_DEFAULT,g" \
+            > $INSTALL/etc/swap.conf
   fi
 }
 
 post_install () {
-  if [ "${SWAP_SUPPORT}" = "yes" ]; then
+  if [ "$SWAP_SUPPORT" = "yes" ]; then
     enable_service swap.service
   fi
-
-  enable_service fstrim.timer
 }

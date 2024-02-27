@@ -3,13 +3,13 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="audioencoder.wav"
-PKG_VERSION="20.2.0-Nexus"
-PKG_SHA256="1baf69cca688ebd389705ea2bef2c5285ba75dcfd0d0b534b6ab1e61c0020979"
+PKG_VERSION="2.0.3-Leia"
+PKG_SHA256="03cb2810b2aa335fd308a5e2b6580d21ac840334c55fc891acc310633c3c49b4"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/xbmc/audioencoder.wav"
-PKG_URL="https://github.com/xbmc/audioencoder.wav/archive/${PKG_VERSION}.tar.gz"
+PKG_URL="https://github.com/xbmc/audioencoder.wav/archive/$PKG_VERSION.tar.gz"
 PKG_DEPENDS_TARGET="toolchain kodi-platform"
 PKG_SECTION=""
 PKG_SHORTDESC="audioencoder.wav: A audioencoder addon for Kodi"

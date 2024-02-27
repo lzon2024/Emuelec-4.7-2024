@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # SPDX-License-Identifier: GPL-2.0
-# Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2019 Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2019-present Team CoreELEC (https://coreelec.org)
 
 cat_data() {
   echo "========== ${1} =========="
@@ -11,18 +12,6 @@ cat_data() {
 cat_file() {
   if [ -f "${1}" ]; then
     cat "${1}" | cat_data "${2:-${1}}"
-  fi
-}
-
-ls_dir() {
-  if [ -d "${1}" ]; then
-    ls -lA "${1}" | cat_data "${1}"
-  fi
-}
-
-ls_dir_recursive() {
-  if [ -d "${1}" ]; then
-    ls -lAR "${1}" | cat_data "${1}"
   fi
 }
 
@@ -48,7 +37,7 @@ while getopts ":hc" opt; do
 done
 
 source /etc/os-release
-SYSTEM_ARCH="${LIBREELEC_ARCH#*.}"
+SYSTEM_ARCH="${COREELEC_ARCH#*.}"
 
 # If running in SAFE mode, send FAILED logs
 if [ "$(cat "/storage/.config/boot.status" 2>/dev/null)" = "SAFE" ]; then
@@ -75,17 +64,19 @@ fi
       echo "Firmware Boot Mode: BIOS"
     fi
   fi
-  if [ "${LIBREELEC_PROJECT}" = "RPi" ]; then
+  if [ "${COREELEC_PROJECT}" = "RPi" ]; then
     echo "RPi Hardware Revision: $(vcgencmd otp_dump | grep 30: | cut -d: -f2)"
-    echo "RPi $(vcgencmd get_throttled)"
   fi
 
   cat_file "${LOG_FILE}"
 
-  journalctl -a -b -0 -o short-precise | cat_data "journalctl -a -b -0"
+  journalctl -a | cat_data "journalctl -a"
 
-  if [ "${LIBREELEC_PROJECT}" = "RPi" ]; then
-    vcgencmd bootloader_version | cat_data "Bootloader version"
+  if [ "${COREELEC_PROJECT}" = "RPi" ]; then
+    bootloader_version="$(vcgencmd bootloader_version)"
+    if ! echo "${bootloader_version}" | grep -q "Command not registered"; then
+      echo  "${bootloader_version}" | cat_data "Bootloader version"
+    fi
   fi
 
   cat_file "/flash/config.txt" # RPi
@@ -102,10 +93,6 @@ fi
   cat_file "${KODI_ROOT}/.smb/user.conf"
   cat_file "/run/samba/smb.conf"
 
-  ls_dir /storage/.config
-  ls_dir_recursive /storage/.config/system.d
-  ls_dir /storage/.config/udev.rules.d
-
   pem_sys="$(sha256sum /etc/ssl/cacert.pem.system | cut -d' ' -f1)"
   pem_run="$(sha256sum /run/libreelec/cacert.pem | cut -d' ' -f1)"
   if [ "${pem_sys}" = "${pem_run}" ]; then
@@ -114,7 +101,7 @@ fi
     cat_file /run/libreelec/cacert.pem "/run/libreelec/cacert.pem (modified)"
   fi
 
-  if [ "${PROJECT}" = "Amlogic-ce" ]; then
+  if [ "${COREELEC_PROJECT}" = "Amlogic" -o "${COREELEC_PROJECT}" = "Amlogic-ng" ]; then
     ce-debug -l | cat_data "ce-debug -l"
   fi
 

@@ -2,13 +2,13 @@
 # Copyright (C) 2019-present Shanti Gilbert (https://github.com/shantigilbert)
 
 PKG_NAME="PPSSPPSDL"
-PKG_VERSION="830420f0c8eafc45dab35a1028b40177fee6c029"
+PKG_VERSION="452a11f118c394b2e03eb23e029aee0b0d0bb0c1"
 PKG_REV="1"
 PKG_ARCH="any"
 PKG_LICENSE="MAME"
-PKG_SITE="https://github.com/hrydgard/ppsspp"
-PKG_URL="https://github.com/hrydgard/ppsspp.git"
-PKG_DEPENDS_TARGET="toolchain ffmpeg libzip libpng SDL2 zlib zip"
+PKG_SITE="https://github.com/coreelecemuelec/PPSSPP-SHADERS"
+PKG_URL="https://github.com/coreelecemuelec/PPSSPP-SHADERS.git"
+PKG_DEPENDS_TARGET="toolchain ffmpeg libzip libpng SDL2-git zlib zip"
 PKG_SHORTDESC="PPSSPPDL"
 PKG_LONGDESC="PPSSPP Standalone"
 GET_HANDLER_SUPPORT="git"

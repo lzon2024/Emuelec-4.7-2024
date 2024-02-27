@@ -21,4 +21,6 @@ distclean:
 	rm -rf ./.ccache ./$(BUILD_DIRS)
 
 src-pkg:
-	tar cvJf sources.tar.xz sources
+	tar cvJf sources.tar.xz sources .stamps
+	
+	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

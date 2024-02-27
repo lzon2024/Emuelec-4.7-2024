@@ -2,8 +2,8 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="game.libretro.mame2016"
-PKG_VERSION="0.174.0.12-Leia"
-PKG_SHA256="56f1e7eba551607e4267e9f35a6f581855b3c243f81a2aa220d0948bbc3d004c"
+PKG_VERSION="0.174.0.3-Leia"
+PKG_SHA256="6659ddf9834871e1456cea2f5e4c5a1ff9e3f04f023efe11d734ce6a4e1cc7f9"
 PKG_REV="1"
 PKG_LICENSE="GPL"
 PKG_SITE="https://github.com/kodi-game/game.libretro.mame2016"
@@ -14,4 +14,3 @@ PKG_LONGDESC="game.libretro.mame2016: MAME2016 emulator for Kodi"
 
 PKG_IS_ADDON="yes"
 PKG_ADDON_TYPE="kodi.gameclient"
-PKG_ADDON_PROJECTS="AMLG12 Generic RK3399"

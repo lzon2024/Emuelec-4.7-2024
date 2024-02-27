@@ -19,31 +19,73 @@
 ################################################################################
 
 PKG_NAME="flycast"
-PKG_VERSION="aa6c9e21063c929ccf651328547e5c6a9afd1f62"
-PKG_ARCH="any"
-PKG_LICENSE="GPLv2"
-PKG_SITE="https://github.com/flyinghead/flycast"
-PKG_URL="$PKG_SITE.git"
-PKG_DEPENDS_TARGET="toolchain ${OPENGLES}"
-PKG_SHORTDESC="Flycast is a multiplatform Sega Dreamcast emulator"
-PKG_BUILD_FLAGS="-lto"
-PKG_TOOLCHAIN="cmake"
 
-PKG_CMAKE_OPTS_TARGET="-DLIBRETRO=ON \
-                        -DUSE_OPENMP=OFF \ 
-                        -DCMAKE_BUILD_TYPE=Release \
-                        -DUSE_GLES2=ON"
+if [[ "${PROJECT}" == "Amlogic" ]]; then
+PKG_VERSION="0e10e86ea9ca0f8655c98909da7a845e7643b36f"
+PKG_SHA256="3a0e72a3c358520db2035c69f39fa1322ce024548dcc57afc1b2c822a47ac4a0"
+PKG_PATCH_DIRS="Amlogic"
+else
+PKG_VERSION="b941ea2f6598f971964c57c058b55ac239a242fe"
+PKG_SHA256="588cffe618c7ac8c4aeb4545e8adebad7c185fbe0b2c23899c80e2e3d69431bc"
+fi
+PKG_LICENSE="GPLv2"
+PKG_SITE="https://github.com/libretro/flycast"
+PKG_URL="$PKG_SITE/archive/$PKG_VERSION.tar.gz"
+PKG_DEPENDS_TARGET="toolchain $OPENGLES"
+PKG_LONGDESC="Flycast is a multiplatform Sega Dreamcast emulator "
+PKG_TOOLCHAIN="make"
+PKG_BUILD_FLAGS="-gold"
+
+pre_configure_target() {
+# Flycast defaults to -O3 but then CHD v5 do not seem to work on EmuELEC so we change it to -O2 to fix the issue
+PKG_MAKE_OPTS_TARGET="ARCH=arm HAVE_OPENMP=0 GIT_VERSION=${PKG_VERSION:0:7} FORCE_GLES=1 SET_OPTIM=-O2 HAVE_LTCG=0"
+
+if [ "${ARCH}" == "aarch64" ]; then
+PKG_MAKE_OPTS_TARGET+=" WITH_DYNAREC=arm64"
+fi
+}
 
 pre_make_target() {
-  find $PKG_BUILD -name flags.make -exec sed -i "s:isystem :I:g" \{} \;
-  find $PKG_BUILD -name build.ninja -exec sed -i "s:isystem :I:g" \{} \;
+   export BUILD_SYSROOT=$SYSROOT_PREFIX
+
+  if [ "$OPENGLES_SUPPORT" = "yes" ]; then
+    PKG_MAKE_OPTS_TARGET+=" FORCE_GLES=1 LDFLAGS=-lrt"
+  fi
+
+if [ "${ARCH}" == "aarch64" ]; then
+  case $PROJECT in
+    Amlogic-ng)
+      PKG_MAKE_OPTS_TARGET+=" platform=odroid-n2"
+      ;;
+    Amlogic)
+      PKG_MAKE_OPTS_TARGET+=" platform=arm64"
+    ;;  
+  esac
+else
+   case $PROJECT in
+    Amlogic-ng)
+      PKG_MAKE_OPTS_TARGET+=" platform=AMLG12B"
+      ;;
+    Amlogic)
+      PKG_MAKE_OPTS_TARGET+=" platform=AMLGX"
+    ;;  
+  esac
+fi
+  
+ if [ "$DEVICE" == "OdroidGoAdvance" ] || [ "$DEVICE" == "GameForce" ]; then
+	if [ "$ARCH" == "arm" ]; then
+	PKG_MAKE_OPTS_TARGET+=" platform=classic_armv8_a35"
+	else
+	PKG_MAKE_OPTS_TARGET+=" platform=arm64"
+	fi
+ fi 
 }
 
 makeinstall_target() {
   mkdir -p $INSTALL/usr/lib/libretro
-  if [ "${ARCH}" == "arm" ]; then
-	cp flycast_libretro.so $INSTALL/usr/lib/libretro/flycast_32b_libretro.so
-  else
+  if [ "${ARCH}" == "aarch64" ]; then
 	cp flycast_libretro.so $INSTALL/usr/lib/libretro/
+  else
+	cp flycast_libretro.so $INSTALL/usr/lib/libretro/flycast_32b_libretro.so
   fi
 }

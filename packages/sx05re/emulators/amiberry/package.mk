@@ -6,7 +6,7 @@ PKG_VERSION="d4176b4a2627fb0e9cbcb26f7c6665d95e1d3303"
 PKG_LICENSE="GPLv3"
 PKG_SITE="https://github.com/midwan/amiberry"
 PKG_URL="https://github.com/midwan/amiberry.git"
-PKG_DEPENDS_TARGET="toolchain linux glibc bzip2 zlib SDL2 SDL2_image SDL2_ttf capsimg freetype libxml2 flac libogg mpg123-compat libpng libmpeg2"
+PKG_DEPENDS_TARGET="toolchain linux glibc bzip2 zlib SDL2-git SDL2_image SDL2_ttf capsimg freetype libxml2 flac libogg mpg123-compat libpng libmpeg2"
 PKG_LONGDESC="Amiberry is an optimized Amiga emulator for ARM-based boards."
 GET_HANDLER_SUPPORT="git"
 PKG_TOOLCHAIN="make"
@@ -16,8 +16,8 @@ pre_configure_target() {
   cd ${PKG_BUILD}
   export SYSROOT_PREFIX=${SYSROOT_PREFIX}
 
-  case ${DEVICE} in
-    Amlogic-old)
+  case ${PROJECT} in
+    Amlogic)
      if [ $ARCH == "arm" ]; then
         AMIBERRY_PLATFORM="AMLGX"
      else 
@@ -40,10 +40,6 @@ else
 AMIBERRY_PLATFORM="go-advance"
 fi
 
-fi
-
-if [ "$DEVICE" == "RK356x" ] || [ "$DEVICE" == "OdroidM1" ]; then
-	AMIBERRY_PLATFORM="a64"
 fi
 
 sed -i "s|AS     = as|AS     \?= as|" Makefile

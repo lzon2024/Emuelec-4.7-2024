@@ -1,7 +1,6 @@
 import os
 import socket
 import xbmc
-import xbmcvfs
 import xbmcaddon
 import xbmcgui
 
@@ -15,12 +14,11 @@ DEFAULTS = dict(
     password='',
     rtp_dest='127.0.0.1',
     rtp_port='24642',
-    connect_port='0',
     username='',
 )
 
 ADDON = xbmcaddon.Addon()
-ADDON_HOME = xbmcvfs.translatePath(ADDON.getAddonInfo('profile'))
+ADDON_HOME = xbmc.translatePath(ADDON.getAddonInfo('profile'))
 ADDON_ICON = ADDON.getAddonInfo('icon')
 ADDON_NAME = ADDON.getAddonInfo('name')
 ADDON_PATH = ADDON.getAddonInfo('path')
@@ -42,7 +40,7 @@ def get_settings():
 
 
 def log(message):
-    xbmc.log('{}: {}'.format(ADDON_NAME, message), xbmc.LOGINFO)
+    xbmc.log('{}: {}'.format(ADDON_NAME, message), xbmc.LOGNOTICE)
 
 
 def notification(message):
